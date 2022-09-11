@@ -5,6 +5,16 @@
 </script>
 
 <style>
+	.background {
+		height: 100vh;
+		width: 100vw;
+
+		position: absolute;
+
+		background-image: url("../img/background.jpg");
+		background-size: cover;
+		background-position: center;
+	}
 	.stamps {
 		position: absolute;
 		top: 50%;
@@ -44,6 +54,7 @@
 	}
 </style>
 {#if $authenticated}
+	<div class="background"></div>
 	<div class="stamps">
 		<Logo/>
 		{#each $stamps as stamp}
@@ -51,5 +62,5 @@
 		{/each}
 	</div>
 {:else}
-	<p>loading...</p>
+	<p>読み込み中...</p>
 {/if}

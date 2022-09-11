@@ -23,6 +23,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 //initialize firebase auth
 export let authenticated = writable(false);
 export let userdata = writable(new UserData());
+export const stamps = writable(new Array<Stamp>())
 const auth = getAuth(firebaseApp)
 const firestore = getFirestore(firebaseApp)
 export let claimingStamp = writable("");
@@ -37,19 +38,30 @@ signInAnonymously(auth)
         if (docSnap.exists()) {
             userdata.set(Object.assign(new UserData(), docSnap.data()))
         }
-        userdata.subscribe((it) => {
-            setDoc(docRef, Object.assign({}, it))
-        })
 
         //check claiming stamp
         if(getQueryString().has("claim")) {
-            claimingStamp.set(getQueryString().get("claim").toString())
+            const claim = getQueryString().get("claim").toString()
+            claimingStamp.set(claim)
             userdata.update((it) => {
-                it.stamps.push(getQueryString().get("claim").toString())
+                if(it.stamps.indexOf(claim) < -1) {
+                    it.stamps.push(claim)
+                    setDoc(docRef, Object.assign({}, userdata))
+                }
                 return it;
             })
             window.history.replaceState('','','/');
         }
+
+        //Load stamps
+        getDocs(collection(firestore, 'stamps')).then((it) => {
+            it.forEach((it) => {
+                stamps.update((array) => {
+                    array.push(new Stamp(it.id,it.get("name")))
+                    return array;
+                })
+            })
+        })
 
         authenticated.set(true)
     })
@@ -59,16 +71,6 @@ signInAnonymously(auth)
         console.log(errorCode + ":" + errorMessage)
     })
 
-//Load stamps
-export const stamps = writable(new Array<Stamp>())
-getDocs(collection(firestore, 'stamps')).then((it) => {
-    it.forEach((it) => {
-        stamps.update((array) => {
-            array.push(new Stamp(it.id,it.get("name")))
-            return array;
-        })
-    })
-})
 
 //App initialization
 const app = new App({
