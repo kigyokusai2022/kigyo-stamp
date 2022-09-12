@@ -51,6 +51,8 @@
 	}
 
 	.stamps {
+		margin-top: 10px;
+
 		display: grid;
 		align-items: center;
 		justify-content: center;
