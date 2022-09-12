@@ -6,19 +6,23 @@
         height: 90%;
         width: auto;
 
-        aspect-ratio: 1;
+        aspect-ratio: 1/1;
 
         margin: 5%;
 
         border: 3px solid;
         box-sizing: border-box;
-        border-radius: 100%;
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     img {
         display: block;
-        height: 100%;
-        width: 100%;
+        height: 95%;
+        width: 95%;
     }
 
     p {

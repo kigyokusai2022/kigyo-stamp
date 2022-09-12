@@ -31,7 +31,11 @@
 
         border: 3px solid;
         box-sizing: border-box;
-        border-radius: 100%;
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .stamp-unclaimed {
@@ -39,8 +43,8 @@
     }
     .stamp-claimed {
         display: block;
-        height: 100%;
-        width: 100%;
+        height: 95%;
+        width: 95%;
     }
 
     .stamp-claim {

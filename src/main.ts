@@ -10,12 +10,13 @@ import {Stamp} from "./lib/Stamp";
 
 //firebase initialization
 const firebaseConfig = {
-    apiKey: "AIzaSyBHJVaSx7M3eQHlCw87sPsP5BMWBJt7TfA",
-    authDomain: "kigyokutest.firebaseapp.com",
-    projectId: "kigyokutest",
-    storageBucket: "kigyokutest.appspot.com",
-    messagingSenderId: "167741060546",
-    appId: "1:167741060546:web:b55a9bcbc4dafbf720525b"
+    apiKey: "AIzaSyDqKbtrFVssyDBka7lUrUygkdvVygfDKf0",
+    authDomain: "kigyo-stamp-1e35b.firebaseapp.com",
+    projectId: "kigyo-stamp-1e35b",
+    storageBucket: "kigyo-stamp-1e35b.appspot.com",
+    messagingSenderId: "241351108267",
+    appId: "1:241351108267:web:481b522bd9820220c979ee",
+    measurementId: "G-SNWNW94KPH"
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -37,6 +38,8 @@ signInAnonymously(auth)
         const docSnap = await getDoc(docRef)
         if (docSnap.exists()) {
             userdata.set(Object.assign(new UserData(), docSnap.data()))
+        } else {
+            await setDoc(docRef, Object.assign({}, new UserData()))
         }
 
         //check claiming stamp
@@ -44,9 +47,9 @@ signInAnonymously(auth)
             const claim = getQueryString().get("claim").toString()
             claimingStamp.set(claim)
             userdata.update((it) => {
-                if(it.stamps.indexOf(claim) < -1) {
+                if(it.stamps.indexOf(claim) < 0) {
                     it.stamps.push(claim)
-                    setDoc(docRef, Object.assign({}, userdata))
+                    setDoc(docRef, Object.assign({}, it))
                 }
                 return it;
             })
@@ -61,7 +64,7 @@ signInAnonymously(auth)
                     return array;
                 })
             })
-        })
+        }).catch((e) => {console.log(e.code + e.message)})
 
         authenticated.set(true)
     })
