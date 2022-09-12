@@ -57,7 +57,7 @@
     }
 
     p {
-        color: gray;
+        color: #333;
     }
 
     @keyframes stamp-claim {
