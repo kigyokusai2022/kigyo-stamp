@@ -1,12 +1,18 @@
 <script lang="ts">
-    import {claimingStamp, userdata} from "../main"
+    import {authenticated, claimedStampsCache, claimingStamp, userdata} from "../main"
 
     export let stampId: string;
     export let stampName: string;
 
+    let isClaimedCache:boolean;
     let isClaimed:boolean;
-    userdata.update((it) => {
-        isClaimed = it.stamps.indexOf(stampId) > -1
+    claimedStampsCache.subscribe((it) => {
+        isClaimedCache = it.indexOf(stampId) > -1;
+        return it;
+    })
+
+    userdata.subscribe((it) => {
+        isClaimed = it.stamps.indexOf(stampId) > -1;
         return it;
     })
 
@@ -50,7 +56,6 @@
     .stamp-claim {
         scale: 0;
         animation-name: stamp-claim;
-        animation-delay: 0.5s;
         animation-duration: 0.8s;
         animation-timing-function: ease-in;
         animation-fill-mode: forwards;
@@ -72,8 +77,8 @@
     }
 </style>
 <div class="wrapper">
-    <div class="box" style="border-color: {(isClaimed || isClaiming) ? 'red' : 'gray'}">
-        <img class="{(isClaimed || isClaiming) ? 'stamp-claimed' : 'stamp-unclaimed'} {isClaiming ? 'stamp-claim' : ''}" src="img/{stampId}.png" alt="">
+    <div class="box" style="border-color: {$authenticated ? (isClaimed ? 'red' : 'gray') : (isClaimedCache ? 'red' : 'gray')}">
+        <img class="{$authenticated ? (isClaimed ? 'stamp-claimed' : 'stamp-unclaimed') : (isClaimedCache ? 'stamp-claimed' : 'stamp-unclaimed')} {isClaiming ? 'stamp-claim' : ''}" src="img/{stampId}.png" alt="">
     </div>
     <p>{stampName}</p>
 </div>

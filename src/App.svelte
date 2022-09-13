@@ -1,7 +1,7 @@
 <script lang="ts">
 	import StampBox from "./components/StampBox.svelte";
-	import {authenticated, stamps} from "./main";
 	import Logo from "./components/Logo.svelte";
+	import {stamps} from "./lib/Stamp";
 </script>
 
 <style>
@@ -26,12 +26,6 @@
 
 		background-color: white;
 		opacity: 0.2;
-	}
-
-	.loading {
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 
 	.box {
@@ -76,20 +70,15 @@
 		}
 	}
 </style>
+
 <div class="background"></div>
 <div class="background-white-effect"></div>
-{#if $authenticated}
-	<div class="box">
-		<p>各参加団体にあるQRコードをカメラアプリで読み込んでスタンプを集めよう！<br>スタンプをすべて回収したら、一号館1Fエントランスの受付で、景品と交換しよう！</p>
-		<div class="stamps">
-			<Logo/>
-			{#each $stamps as stamp}
-				<StampBox stampId={stamp.id} stampName={stamp.name}/>
-			{/each}
-		</div>
+<div class="box">
+	<p>各参加団体にあるQRコードをカメラアプリで読み込んでスタンプを集めよう！<br>スタンプをすべて回収したら、一号館1Fエントランスの受付で、景品と交換しよう！</p>
+	<div class="stamps">
+		<Logo/>
+		{#each $stamps as stamp}
+			<StampBox stampId={stamp.id} stampName={stamp.name}/>
+		{/each}
 	</div>
-{:else}
-	<div class="loading">
-		<h1>読み込み中...</h1>
-	</div>
-{/if}
+</div>

@@ -27,6 +27,7 @@
   "dependencies": {
     "firebase": "^9.9.4",
     "firebase-cli": "^1.2.0",
+    "js-cookie": "^3.0.1",
     "rollup-plugin-image-files": "^1.4.2",
     "sirv-cli": "^2.0.0"
   }

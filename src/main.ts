@@ -1,11 +1,25 @@
 import App from './App.svelte';
 import {initializeApp} from "firebase/app";
 import {getAuth, signInAnonymously} from "firebase/auth";
-import {getFirestore, collection, doc, getDoc, setDoc, getDocs} from "firebase/firestore";
-import {writable} from "svelte/store";
+import {getFirestore, collection, doc, getDoc, setDoc} from "firebase/firestore";
+import {Readable, readable, writable} from "svelte/store";
 import {UserData} from "./lib/UserData";
 import {getQueryString} from "./lib/util";
-import {Stamp} from "./lib/Stamp";
+import Cookies from "js-cookie";
+
+//stores
+export let userdata = writable(new UserData());
+export let claimingStamp = writable("");
+export let authenticated = writable(false);
+
+// load stamp cache
+const claimedStamps = Cookies.get("claimedStamps")
+export let claimedStampsCache: Readable<string>
+if(claimedStamps != undefined) {
+    claimedStampsCache = readable(Cookies.get("claimedStamps")?.split(","));
+} else {
+    claimedStampsCache = readable("");
+}
 
 //font setup
 (function(d) {
@@ -17,6 +31,16 @@ import {Stamp} from "./lib/Stamp";
         h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true; // @ts-ignore
     tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
 })(document);
+
+//App initialization
+const app = new App({
+    target: document.body,
+    props: {
+        name: 'world'
+    }
+});
+
+export default app;
 
 //firebase initialization
 const firebaseConfig = {
@@ -32,12 +56,8 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 
 //initialize firebase auth
-export let authenticated = writable(false);
-export let userdata = writable(new UserData());
-export const stamps = writable(new Array<Stamp>())
 const auth = getAuth(firebaseApp)
 const firestore = getFirestore(firebaseApp)
-export let claimingStamp = writable("");
 
 signInAnonymously(auth)
     .then(async () => {
@@ -56,42 +76,22 @@ signInAnonymously(auth)
         if(getQueryString().has("claim")) {
             const claim = getQueryString().get("claim").toString()
             claimingStamp.set(claim)
-            userdata.update((it) => {
+            userdata.subscribe((it) => {
                 if(it.stamps.indexOf(claim) < 0) {
                     it.stamps.push(claim)
+                    Cookies.set("claimedStamps", it.stamps.join(","))
                     setDoc(docRef, Object.assign({}, it))
                 }
-                return it;
+                authenticated.set(true);
             })
             window.history.replaceState('','','/');
+        } else {
+            authenticated.set(true);
         }
-
-        //Load stamps
-        getDocs(collection(firestore, 'stamps')).then((it) => {
-            it.forEach((it) => {
-                stamps.update((array) => {
-                    array.push(new Stamp(it.id,it.get("name")))
-                    return array;
-                })
-            })
-        }).catch((e) => {console.log(e.code + e.message)})
-
-        authenticated.set(true)
     })
     .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log(errorCode + ":" + errorMessage)
     })
-
-
-//App initialization
-const app = new App({
-    target: document.body,
-    props: {
-        name: 'world'
-    }
-});
-
-export default app;
 
