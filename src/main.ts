@@ -1,7 +1,7 @@
 import App from './App.svelte';
 import {initializeApp} from "firebase/app";
 import {getAuth, signInAnonymously} from "firebase/auth";
-import {getFirestore, collection, doc, getDoc, setDoc} from "firebase/firestore";
+import {collection, doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
 import {Readable, readable, writable} from "svelte/store";
 import {UserData} from "./lib/UserData";
 import {getQueryString} from "./lib/util";
@@ -9,8 +9,14 @@ import Cookies from "js-cookie";
 
 //stores
 export let userdata = writable(new UserData());
-export let claimingStamp = writable("");
+export let claimingStamp = "";
 export let authenticated = writable(false);
+
+//check claiming stamps
+if(getQueryString().has("claim")) {
+    claimingStamp = getQueryString().get("claim").toString();
+    window.history.replaceState('','','/');
+}
 
 // load stamp cache
 const claimedStamps = Cookies.get("claimedStamps")
@@ -69,25 +75,22 @@ signInAnonymously(auth)
         if (docSnap.exists()) {
             userdata.set(Object.assign(new UserData(), docSnap.data()))
         } else {
-            await setDoc(docRef, Object.assign({}, new UserData()))
+            setDoc(docRef, Object.assign({}, new UserData())).then();
         }
 
-        //check claiming stamp
-        if(getQueryString().has("claim")) {
-            const claim = getQueryString().get("claim").toString()
-            claimingStamp.set(claim)
-            userdata.subscribe((it) => {
-                if(it.stamps.indexOf(claim) < 0) {
-                    it.stamps.push(claim)
-                    Cookies.set("claimedStamps", it.stamps.join(","))
-                    setDoc(docRef, Object.assign({}, it))
+        //claim stamp
+        userdata.subscribe((data) => {
+            if(claimingStamp!="") {
+                if(data.stamps.indexOf(claimingStamp) < 0) {
+                    data.stamps.push(claimingStamp)
+                    setDoc(docRef, Object.assign({}, data))
                 }
-                authenticated.set(true);
-            })
-            window.history.replaceState('','','/');
-        } else {
+            }
             authenticated.set(true);
-        }
+            Cookies.set("claimedStamps", data.stamps.join(","))
+        })
+
+        console.log("authenticated.");
     })
     .catch((error) => {
         const errorCode = error.code;

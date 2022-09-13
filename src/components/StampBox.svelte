@@ -1,8 +1,8 @@
 <script lang="ts">
     import {authenticated, claimedStampsCache, claimingStamp, userdata} from "../main"
 
-    export let stampId: string;
-    export let stampName: string;
+    export let stampId: string = "";
+    export let stampName: string = "";
 
     let isClaimedCache:boolean;
     let isClaimed:boolean;
@@ -16,11 +16,8 @@
         return it;
     })
 
-    let isClaiming:boolean;
-    claimingStamp.update((it) => {
-        isClaiming = it == stampId;
-        return it;
-    })
+    let isClaiming:boolean = claimingStamp == stampId;
+
 </script>
 
 <style>
@@ -76,9 +73,14 @@
         }
     }
 </style>
+
 <div class="wrapper">
-    <div class="box" style="border-color: {$authenticated ? (isClaimed ? 'red' : 'gray') : (isClaimedCache ? 'red' : 'gray')}">
-        <img class="{$authenticated ? (isClaimed ? 'stamp-claimed' : 'stamp-unclaimed') : (isClaimedCache ? 'stamp-claimed' : 'stamp-unclaimed')} {isClaiming ? 'stamp-claim' : ''}" src="img/{stampId}.png" alt="">
+    <div class="box" style="border-color: {$authenticated ? (isClaimed || isClaiming ? 'red' : 'gray') : (isClaimedCache || isClaiming ? 'red' : 'gray')}">
+        <img class="{
+        $authenticated ?
+        (isClaimed || isClaiming ? 'stamp-claimed' : 'stamp-unclaimed')
+        : (isClaimedCache || isClaiming ? 'stamp-claimed' : 'stamp-unclaimed')
+        } {isClaiming ? 'stamp-claim' : ''}" src="img/{stampId}.png" alt="">
     </div>
     <p>{stampName}</p>
 </div>
